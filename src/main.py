@@ -3,7 +3,7 @@ import psycopg2
 import random
 from datetime import datetime
 
-fake = faker.Faker('pt_BR')
+fake = faker.Faker()
 
 def generate_transaction():
     user = fake.simple_profile()

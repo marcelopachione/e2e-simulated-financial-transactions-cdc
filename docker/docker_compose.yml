@@ -38,6 +38,7 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
+      KAFKA_CREATE_TOPICS: "connect_configs:1:1,connect_statuses:1:1,connect_offsets:1:1"
     healthcheck:
       test: nc -z localhost 9092 || exit -1
       start_period: 15s
@@ -63,9 +64,10 @@ services:
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       CONFLIENT_METRICS_ENABLE: 'false'
+      CONTROL_CENTER_CONNECT_CLUSTER: 'debezium:8083'
       PORT: 9021
     networks:
-      - cdc-network
+      cdc-network:
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9021/health" ]
       interval: 30s
@@ -82,7 +84,7 @@ services:
       broker:
         condition: service_healthy
     ports:
-      - '8093:8083'
+      - '8083:8083'
     environment:
       BOOTSTRAP_SERVERS: broker:29092
       CONNECT_REST_ADVERTISED_HOST_NAME: debezium
@@ -102,6 +104,8 @@ services:
       retries: 5
     networks:
       cdc-network:
+    volumes:
+      - debezium-config:/kafka/connect
 
   debezium-ui:
     image: debezium/debezium-ui:latest
@@ -173,4 +177,6 @@ volumes:
   postgresql_datafiles:
     driver: local
   postgresql_bin:
+    driver: local
+  debezium-config:
     driver: local
